@@ -1,2 +1,2 @@
 # the-lost-boy-
-the lost boy who found is place 
+the lost boy who found his place 
