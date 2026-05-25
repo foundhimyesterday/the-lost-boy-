@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>The Lost Boy — A Digital Book</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            font-family: 'Georgia', 'Times New Roman', 'Palatino', serif;
+            color: #e8e6e3;
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* Book container */
+        .book-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #111116;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Page header with title and nav */
+        .book-header {
+            padding: 2rem 2rem 0 2rem;
+            border-bottom: 1px solid #2a2a35;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .book-title {
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            font-weight: 400;
+            color: #c0a080;
+            font-family: 'Segoe UI', 'Georgia', serif;
+        }
+
+        .book-title span {
+            font-style: italic;
+            color: #6a6a7a;
+        }
+
+        .page-nav {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            background: #1e1e28;
+            border: 1px solid #3a3a48;
+            color: #e8e6e3;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #c0a080;
+            color: #0a0a0f;
+            border-color: #c0a080;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Page content area */
+        .book-content {
+            padding: 2.5rem 3rem;
+            min-height: 65vh;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography for the story */
+        .chapter-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            color: #c0a080;
+            letter-spacing: -0.3px;
+            border-left: 3px solid #c0a080;
+            padding-left: 1rem;
+        }
+
+        .chapter-number {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #6a6a7a;
+            margin-bottom: 0.5rem;
+        }
+
+        .prose {
+            font-size: 1.05rem;
+            text-align: justify;
+        }
+
+        .prose p {
+            margin-bottom: 1.4rem;
+        }
+
+        .prose p:first-child::first-letter {
+            font-size: 3rem;
+            font-weight: 500;
+            float: left;
+            line-height: 0.8;
+            padding-right: 0.5rem;
+            color: #c0a080;
+        }
+
+        .poetry {
+            font-style: italic;
+            color: #b8b0a0;
+            margin: 2rem 0;
+            padding-left: 2rem;
+            border-left: 2px solid #3a3a48;
+        }
+
+        /* Page indicator */
+        .page-indicator {
+            text-align: center;
+            padding: 1rem 2rem 2rem 2rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #5a5a6a;
+            border-top: 1px solid #1e1e28;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-number {
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 650px) {
+            .book-content {
+                padding: 1.8rem;
+            }
+            .chapter-title {
+                font-size: 1.5rem;
+            }
+            .prose {
+                font-size: 0.95rem;
+            }
+            .book-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        /* Book edge effect */
+        .book-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 30% 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.3) 100%);
+            z-index: 2;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #4a4a5a;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="book-container">
+    <div class="book-header">
+        <div class="book-title">THE LOST BOY <span>— a fragment</span></div>
+        <div class="page-nav">
+            <button class="nav-btn" id="prevBtn">◀ PREV</button>
+            <button class="nav-btn" id="nextBtn">NEXT ▶</button>
+        </div>
+    </div>
+
+    <div class="book-content" id="bookContent">
+        <!-- PAGE 1 -->
+        <div class="page active-page" data-page="1">
+            <div class="chapter-number">Prologue</div>
+            <div class="chapter-title">The boy who stopped answering</div>
+            <div class="prose">
+                <p>The last time anyone saw Elias Voss, he was standing at the edge of the Overlook Trail, hands in the pockets of a jacket too thin for October. That was four years ago, give or take [...]
+                <p>His mother keeps his room exactly as he left it. Bed unmade. A half-empty glass of water on the nightstand, the liquid long evaporated into a white ring. A copy of <em>The Odyssey</[...]
+                <div class="poetry">
+                    "He was always looking for something," she told the detective. "I just never knew what."
+                </div>
+                <p>This is the story of a boy who got lost. Not in the woods — though the woods were involved. Not in grief — though grief was the weather. He got lost in the space between who he [...]
+            </div>
+        </div>
+
+        <!-- PAGE 2 -->
+        <div class="page" data-page="2">
+            <div class="chapter-number">Chapter One</div>
+            <div class="chapter-title">The last polaroid</div>
+            <div class="prose">
+                <p>Elias had a habit of collecting things that didn't belong to him. Not stealing — that implies intent, value, a transaction. He collected <em>residue</em>. A matchbook from a diner[...]
+                <p>"You're building a world out of other people's trash," his sister Lena told him once. She wasn't being cruel. Lena was never cruel. She was worried — the way people get when they [...]
+                <p>"I'm building evidence," Elias said, not looking up from a train ticket dated 1987. "That people existed. That I existed."</p>
+                <p>Lena didn't know what to say to that. She was sixteen, two years older, and already carrying the weight of being the one who remembered birthdays and due dates and which parent need[...]
+                <p>"You exist," she said finally. Too flat. Too late. The words landed on the carpet between them and stayed there, ungathered.</p>
+            </div>
+        </div>
+
+        <!-- PAGE 3 -->
+        <div class="page" data-page="3">
+            <div class="chapter-number">Chapter Two</div>
+            <div class="chapter-title">Where the trail forgets itself</div>
+            <div class="prose">
+                <p>The Overlook Trail wasn't dangerous. That was the thing everyone said afterward, as if danger could be measured in missing persons posters rather than in the quiet erosion of a mind[...]
+                <p>But trails have memories. Elias knew this. He'd walked the Overlook a hundred times, always alone, always at dusk, when the light turned the pine needles to copper and the air smell[...]
+                <p>"There's a thirteen-year-old Elias somewhere on this trail," he told his journal once. "He's still looking for the path back to who he was before the thing that happened. I pass him[...]
+                <p>The journal was leather-bound, a gift from a teacher who saw something flicker in him and wanted to give it a place to land. Elias filled it with maps of imaginary places, lists of [...]
+                <p>He never sent the letters. He never told her name to anyone.</p>
+            </div>
+        </div>
+
+        <!-- PAGE 4 -->
+        <div class="page" data-page="4">
+            <div class="chapter-number">Chapter Three</div>
+            <div class="chapter-title">The things he left behind</div>
+            <div class="prose">
+                <p>When the search party finally went out — three days after Elias stopped coming home — they found his jacket hanging on a low branch, fifty yards off the main trail. The pockets [...]
+                <p>The detective assigned to the case, a man named Pullman who'd seen too many runaways turn into permanencies, sat with Elias's mother in the kitchen of the small house on Birch Stree[...]
+                <p>"Has he ever talked about wanting to leave?" Pullman asked.</p>
+                <p>"He talked about wanting to be somewhere else," she said. "But that's different, isn't it? Wanting to be somewhere else. Everyone wants that."</p>
+                <p>Pullman nodded. He'd wanted to be somewhere else his whole life. He was still here.</p>
+                <div class="poetry">
+                    "Boys like Elias," he thought but didn't say, "they don't run away. They dissolve."
+                </div>
+                <p>They never found a body. They never found evidence of foul play. After six months, the case went cold, and Elias Voss became a story — the kind told in hushed voices at the town's[...]
+                <p>But Lena kept looking. In her own way. She'd drive to the trailhead every Sunday morning, sit on the same bench where Elias used to tie his shoes, and wait. She didn't know what she[...]
+            </div>
+        </div>
+
+        <!-- PAGE 5 -->
+        <div class="page" data-page="5">
+            <div class="chapter-number">Epilogue</div>
+            <div class="chapter-title">What the water remembers</div>
+            <div class="prose">
+                <p>Four years, two months, and eleven days after Elias disappeared, a hiker found a shoebox wedged between the roots of an old-growth pine, half a mile past where the trail officially [...]
+                <p>The matchbook. The hair clip. The photograph of the unknown family. The train ticket from 1987. A dozen other small monuments to lives Elias had never lived.</p>
+                <p>And at the bottom, folded into a square so small it could fit in a palm, was a note. Not to his mother. Not to Lena. To the girl whose name he never wrote down, whose shampoo smelle[...]
+                <div class="poetry">
+                    "I'm not lost," the note read. "I just finally found a direction that isn't away from myself. If you're reading this — thank you for existing in the world while I was in it. That[...]
+                </div>
+                <p>The hiker turned the note over. On the back, in handwriting so small it required a magnifying glass, Elias had written a single line from a poem he'd memorized in ninth grade Englis[...]
+                <p><em>"I have been one acquainted with the night."</em></p>
+                <p>The shoebox now sits in the Meridian Historical Society, in a glass case labeled <strong>Elias Voss — Lost, Not Forgotten</strong>. Lena visits it sometimes. She doesn't cry anymo[...]
+                <p>The trail still loops three miles through the pines. Joggers still use it. Retirees. The occasional teenager looking for a place to smoke. And sometimes, at dusk, when the light tur[...]
+                <p>He never turns around. He never answers when they call his name.</p>
+                <p>But he's there. Somewhere between memory and myth. A lost boy who finally found a place to stay.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-indicator">
+        <span class="page-number">✦</span>
+        <span id="pageCounter">Page 1 of 5</span>
+        <span class="page-number">✦</span>
+    </div>
+</div>
+<footer>a digital fragment — press PREV / NEXT to turn pages</footer>
+
+<script>
+    // Page turning logic
+    const pages = document.querySelectorAll('.page');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageCounter = document.getElementById('pageCounter');
+    let currentPage = 0;
+
+    function updatePages() {
+        pages.forEach((page, index) => {
+            if (index === currentPage) {
+                page.classList.add('active-page');
+            } else {
+                page.classList.remove('active-page');
+            }
+        });
+        pageCounter.innerText = `Page ${currentPage + 1} of ${pages.length}`;
+    }
+
+    function nextPage() {
+        if (currentPage < pages.length - 1) {
+            currentPage++;
+            updatePages();
+        } else {
+            // Optional: subtle feedback at end of book
+            pageCounter.style.opacity = '0.6';
+            setTimeout(() => { pageCounter.style.opacity = '1'; }, 200);
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            updatePages();
+        }
+    }
+
+    prevBtn.addEventListener('click', prevPage);
+    nextBtn.addEventListener('click', nextPage);
+
+    // Keyboard support for arrow keys (because readers appreciate it)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            prevPage();
+            e.preventDefault();
+        } else if (e.key === 'ArrowRight') {
+            nextPage();
+            e.preventDefault();
+        }
+    });
+
+    // Touch swipe support for mobile (basic)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.querySelector('.book-container').addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    document.querySelector('.book-container').addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) nextPage();
+        if (touchEndX > touchStartX + 50) prevPage();
+    });
+</script>
+</body>
+</html>
